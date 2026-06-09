@@ -5,26 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Los Héroes</title>
     <style>
-        /* إعدادات الصفحة الأساسية */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             margin: 0;
             padding: 20px;
             color: #fff;
             min-height: 100vh;
         }
 
-        /* عنوان الصفحة */
-        h2 {
+        .title-container {
             text-align: center;
-            font-size: 28px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 30px;
-            letter-spacing: 1px;
         }
 
-        /* رسالة التحميل */
+        .title-container h2 {
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #f1c40f, #e74c3c, #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-container p {
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
         #loader {
             text-align: center;
             font-size: 18px;
@@ -34,15 +50,42 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* حاوية المنصة (أول 3 مراكز) */
+        .error-msg {
+            text-align: center;
+            color: #e74c3c;
+            font-size: 16px;
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .retry-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
         .podium-container {
             display: flex;
             justify-content: center;
             align-items: flex-end;
             margin-bottom: 40px;
-            gap: 10px;
-            height: 180px;
-            display: none; /* مخفية لحد ما الداتا تحمل */
+            gap: 8px;
+            height: 220px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .podium-place {
@@ -51,57 +94,109 @@
             align-items: center;
             justify-content: flex-end;
             border-radius: 15px 15px 5px 5px;
-            width: 30%;
-            padding-bottom: 15px;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            width: 33%;
+            padding: 15px 5px;
             text-align: center;
             position: relative;
-            animation: slideUp 0.8s ease forwards;
             opacity: 0;
             transform: translateY(50px);
         }
 
-        /* تصميم كروت المنصة */
-        .podium-place .medal { font-size: 35px; margin-bottom: 5px; }
-        .podium-place .name { font-weight: bold; font-size: 14px; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; width: 90%; white-space: nowrap;}
-        .podium-place .score { font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 10px; }
+        .podium-place.show {
+            animation: slideUp 0.8s ease forwards;
+        }
 
-        /* ترتيب وألوان المنصة */
-        .place-1 { 
-            height: 100%; 
-            background: linear-gradient(to top, #f1c40f, #f39c12); 
-            order: 2; /* الأول في النص */
+        .podium-place .medal {
+            font-size: 40px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+        }
+
+        .podium-place .name {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 95%;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .podium-place .score {
+            font-size: 12px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 10px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .podium-place .rank-label {
+            position: absolute;
+            top: -10px;
+            background: #fff;
+            color: #333;
+            font-weight: 900;
+            font-size: 12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .place-1 {
+            height: 100%;
+            background: linear-gradient(to top, #f39c12, #f1c40f, #ffeaa7);
+            order: 2;
             z-index: 3;
-            animation-delay: 0.2s;
+            box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);
         }
-        .place-2 { 
-            height: 75%; 
-            background: linear-gradient(to top, #bdc3c7, #95a5a6); 
-            order: 1; /* التاني على الشمال */
+        .place-1 .rank-label { background: #f1c40f; color: #fff; }
+
+        .place-2 {
+            height: 75%;
+            background: linear-gradient(to top, #7f8c8d, #bdc3c7, #dfe6e9);
+            order: 1;
             z-index: 2;
-            animation-delay: 0.4s;
+            box-shadow: 0 0 20px rgba(189, 195, 199, 0.3);
         }
-        .place-3 { 
-            height: 60%; 
-            background: linear-gradient(to top, #cd7f32, #e67e22); 
-            order: 3; /* التالت على اليمين */
+        .place-2 .rank-label { background: #bdc3c7; color: #fff; }
+
+        .place-3 {
+            height: 60%;
+            background: linear-gradient(to top, #e67e22, #cd7f32, #f0b27a);
+            order: 3;
             z-index: 1;
-            animation-delay: 0.6s;
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.3);
+        }
+        .place-3 .rank-label { background: #cd7f32; color: #fff; }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #888;
         }
 
-        /* باقي اللاعبين (من المركز الرابع) */
         .leaderboard-list {
             list-style: none;
             padding: 0;
             margin: 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .player-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 12px;
-            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+            padding: 14px 16px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
@@ -110,43 +205,59 @@
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(20px);
+        }
+
+        .player-card.show {
             animation: fadeInUp 0.5s ease forwards;
         }
 
-        /* تأثير اللمس */
         .player-card:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.97) !important;
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .rank-circle {
-            background: #34495e;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: #fff;
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 50%;
             font-size: 14px;
-            border: 2px solid #fff;
+            font-weight: 900;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
         .list-name {
             flex-grow: 1;
-            margin-left: 15px;
-            font-size: 16px;
+            margin-left: 14px;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .list-score {
             color: #2ecc71;
-            font-size: 16px;
-            background: rgba(0,0,0,0.2);
-            padding: 5px 10px;
+            font-size: 15px;
+            font-weight: 900;
+            background: rgba(46, 204, 113, 0.1);
+            padding: 5px 12px;
             border-radius: 8px;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            white-space: nowrap;
         }
 
-        /* الأنيميشن */
+        .player-count {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            font-size: 13px;
+        }
+
         @keyframes fadeInUp {
             to { opacity: 1; transform: translateY(0); }
         }
@@ -158,102 +269,232 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
+
+        @media (max-width: 400px) {
+            .podium-place .name { font-size: 11px; }
+            .podium-place .score { font-size: 10px; }
+            .podium-place .medal { font-size: 30px; }
+            .list-name { font-size: 13px; }
+            .list-score { font-size: 13px; padding: 4px 8px; }
+        }
     </style>
 </head>
 <body>
 
-    <h2>🏆 Los Héroes 🏆</h2>
+    <div class="title-container">
+        <h2>🏆 Los Héroes 🏆</h2>
+        <p>Tabla de clasificación actualizada</p>
+    </div>
 
     <div id="loader">Cargando los héroes... ⏳</div>
 
-    <div class="podium-container" id="podium">
-        </div>
+    <div class="podium-container" id="podium" style="display:none;"></div>
 
-    <ul class="leaderboard-list" id="board">
-        </ul>
+    <div class="divider" id="divider" style="display:none;">── Clasificación completa ──</div>
+
+    <ul class="leaderboard-list" id="board"></ul>
+
+    <div class="player-count" id="playerCount" style="display:none;"></div>
 
     <script>
-        // رابط السكريبت الخاص بك
-        const scriptURL = "https://script.google.com/macros/s/AKfycbytoWEVs928mvLWytdf_GrpHqxQMzdTU9fXEwmUqmvrC8aNjCbFQZtiIG3YbzAd-yg/exec?action=getAllGames";
+        // ✅ معرف الشيت و الـ GID
+        const SHEET_ID = "2PACX-1vQjTVIQOfLpV4ZtTSVD18eNrZTtEVDjPe9pU58HtcciErdDyUxqTZq6uZPfoAxXhYD2ja4iHJSqNoWo";
+        const GID = "1663538134";
+
+        // قائمة بروابط ممكن نجربها بالترتيب
+        const URLS_TO_TRY = [
+            // الرابط الأساسي
+            `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${GID}&single=true&output=csv`,
+            // عبر Proxy AllOrigins
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${GID}&single=true&output=csv`)}`,
+            // عبر CORS Proxy
+            `https://corsproxy.io/?${encodeURIComponent(`https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${GID}&single=true&output=csv`)}`,
+        ];
+
+        // CSV Parser
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split(/\r?\n/);
+            const result = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                result.push(values);
+            }
+
+            return result;
+        }
+
+        // البحث عن أعمدة الاسم والنقاط
+        function findColumns(headers) {
+            let nameCol = -1;
+            let scoreCol = -1;
+
+            for (let i = 0; i < headers.length; i++) {
+                const h = headers[i].toLowerCase().trim();
+                if (nameCol === -1 && (h.includes('name') || h.includes('nombre') || h.includes('اسم') || h.includes('player') || h.includes('jugador'))) {
+                    nameCol = i;
+                }
+                if (scoreCol === -1 && (h.includes('score') || h.includes('punt') || h.includes('نقاط') || h.includes('point') || h.includes('total') || h.includes('نقط'))) {
+                    scoreCol = i;
+                }
+            }
+
+            if (nameCol === -1) nameCol = 0;
+            if (scoreCol === -1) scoreCol = headers.length > 1 ? 1 : 0;
+
+            return { nameCol, scoreCol };
+        }
+
+        // محاولة الجلب من عدة مصادر
+        async function tryFetch(urls) {
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    console.log(`Trying URL ${i + 1}/${urls.length}:`, urls[i]);
+                    const response = await fetch(urls[i]);
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text && text.length > 0) {
+                            console.log(`✅ Success with URL ${i + 1}`);
+                            return text;
+                        }
+                    }
+                } catch (err) {
+                    console.warn(`❌ Failed URL ${i + 1}:`, err.message);
+                }
+            }
+            throw new Error("جميع المحاولات فشلت");
+        }
 
         async function fetchLeaderboard() {
+            const loader = document.getElementById("loader");
+            const podium = document.getElementById("podium");
+            const board = document.getElementById("board");
+            const divider = document.getElementById("divider");
+            const playerCount = document.getElementById("playerCount");
+
+            // مسح أي محتوى قديم
+            podium.innerHTML = '';
+            board.innerHTML = '';
+            loader.style.display = 'block';
+            podium.style.display = 'none';
+            divider.style.display = 'none';
+            playerCount.style.display = 'none';
+
             try {
-                const response = await fetch(scriptURL);
-                const data = await response.json();
-                
-                const podium = document.getElementById("podium");
-                const board = document.getElementById("board");
-                const loader = document.getElementById("loader");
+                const csvText = await tryFetch(URLS_TO_TRY);
+                const rows = parseCSV(csvText);
+
+                if (rows.length < 2) {
+                    loader.innerHTML = "❌ No hay datos suficientes.";
+                    return;
+                }
+
+                const headers = rows[0];
+                const { nameCol, scoreCol } = findColumns(headers);
+
+                console.log("Headers:", headers);
+                console.log("Name col:", nameCol, "| Score col:", scoreCol);
+
+                let players = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    const name = row[nameCol] ? row[nameCol].trim() : '';
+                    const scoreRaw = row[scoreCol] ? row[scoreCol].trim().replace(/[^0-9.\-]/g, '') : '0';
+                    const score = parseFloat(scoreRaw) || 0;
+
+                    if (name && name !== '') {
+                        players.push({ name, score });
+                    }
+                }
+
+                // ✅ ترتيب من الأكبر للأصغر
+                players.sort((a, b) => b.score - a.score);
+
+                console.log("Players:", players);
+
+                if (players.length === 0) {
+                    loader.innerHTML = "❌ No se encontraron jugadores.";
+                    return;
+                }
 
                 loader.style.display = "none";
                 podium.style.display = "flex";
 
-                // التأكد من وجود بيانات
-                if(!data || data.length === 0) {
-                    board.innerHTML = "<p style='text-align:center;'>No hay datos disponibles.</p>";
-                    return;
-                }
+                // المنصة
+                const medals = ['🥇', '🥈', '🥉'];
+                const placeClasses = ['place-1', 'place-2', 'place-3'];
+                const top3 = players.slice(0, 3);
 
-                // تجهيز أول 3 مراكز (المنصة)
-                const top3 = data.slice(0, 3);
-                
-                // إضافة المركز الأول إن وجد
-                if(top3[0]) {
-                    podium.innerHTML += `
-                        <div class="podium-place place-1">
-                            <div class="medal">🥇</div>
-                            <div class="name">${top3[0].name || top3[0][0]}</div>
-                            <div class="score">${top3[0].score || top3[0][1]} Pts</div>
-                        </div>
+                top3.forEach((player, index) => {
+                    const div = document.createElement('div');
+                    div.className = `podium-place ${placeClasses[index]}`;
+                    div.innerHTML = `
+                        <div class="rank-label">${index + 1}</div>
+                        <div class="medal">${medals[index]}</div>
+                        <div class="name">${player.name}</div>
+                        <div class="score">${player.score} Pts</div>
                     `;
-                }
-                
-                // إضافة المركز الثاني إن وجد
-                if(top3[1]) {
-                    podium.innerHTML += `
-                        <div class="podium-place place-2">
-                            <div class="medal">🥈</div>
-                            <div class="name">${top3[1].name || top3[1][0]}</div>
-                            <div class="score">${top3[1].score || top3[1][1]} Pts</div>
-                        </div>
-                    `;
-                }
-                
-                // إضافة المركز الثالث إن وجد
-                if(top3[2]) {
-                    podium.innerHTML += `
-                        <div class="podium-place place-3">
-                            <div class="medal">🥉</div>
-                            <div class="name">${top3[2].name || top3[2][0]}</div>
-                            <div class="score">${top3[2].score || top3[2][1]} Pts</div>
-                        </div>
-                    `;
-                }
+                    podium.appendChild(div);
 
-                // تجهيز باقي اللاعبين (من المركز الرابع للآخر)
-                const restPlayers = data.slice(3);
-                restPlayers.forEach((player, index) => {
-                    const rankNum = index + 4; // لأننا شلنا أول 3
-                    const li = document.createElement("li");
-                    li.className = "player-card";
-                    // نظبط التأخير بتاع الأنيميشن عشان ينزلوا ورا بعض
-                    li.style.animationDelay = `${(index * 0.1) + 0.8}s`; 
-                    
-                    // استخدمنا || عشان لو السكريبت بيرجع المصفوفة كأسماء أعمدة أو أرقام
-                    const playerName = player.name || player[0]; 
-                    const playerScore = player.score || player[1];
-
-                    li.innerHTML = `
-                        <div class="rank-circle">${rankNum}</div>
-                        <div class="list-name">${playerName}</div>
-                        <div class="list-score">${playerScore} Pts</div>
-                    `;
-                    board.appendChild(li);
+                    setTimeout(() => {
+                        div.classList.add('show');
+                    }, 200 + (index * 300));
                 });
 
+                // باقي اللاعبين
+                const restPlayers = players.slice(3);
+
+                if (restPlayers.length > 0) {
+                    divider.style.display = "block";
+
+                    restPlayers.forEach((player, index) => {
+                        const li = document.createElement("li");
+                        li.className = "player-card";
+
+                        const rankNum = index + 4;
+                        li.innerHTML = `
+                            <div class="rank-circle">${rankNum}</div>
+                            <div class="list-name">${player.name}</div>
+                            <div class="list-score">${player.score} Pts</div>
+                        `;
+                        board.appendChild(li);
+
+                        setTimeout(() => {
+                            li.classList.add('show');
+                        }, 1000 + (index * 80));
+                    });
+                }
+
+                playerCount.style.display = "block";
+                playerCount.textContent = `Total: ${players.length} jugadores`;
+
             } catch (error) {
-                document.getElementById("loader").innerHTML = "❌ Error de conexión. Verifica tu internet.";
-                console.error("Error al obtener los datos:", error);
+                console.error("Error final:", error);
+                loader.innerHTML = `
+                    <div class="error-msg">
+                        ❌ <strong>Error al cargar los datos</strong><br>
+                        <small style="color:#ccc;">No se pudo conectar con Google Sheets</small><br>
+                        <button class="retry-btn" onclick="fetchLeaderboard()">🔄 Reintentar</button>
+                    </div>
+                `;
             }
         }
 
