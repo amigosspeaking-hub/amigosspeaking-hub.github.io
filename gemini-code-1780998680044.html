@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Héroes</title>
+    <style>
+        /* إعدادات الصفحة الأساسية */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* عنوان الصفحة */
+        h2 {
+            text-align: center;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        /* رسالة التحميل */
+        #loader {
+            text-align: center;
+            font-size: 18px;
+            color: #f1c40f;
+            font-weight: bold;
+            margin-top: 50px;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* حاوية المنصة (أول 3 مراكز) */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            gap: 10px;
+            height: 180px;
+            display: none; /* مخفية لحد ما الداتا تحمل */
+        }
+
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            border-radius: 15px 15px 5px 5px;
+            width: 30%;
+            padding-bottom: 15px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            position: relative;
+            animation: slideUp 0.8s ease forwards;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        /* تصميم كروت المنصة */
+        .podium-place .medal { font-size: 35px; margin-bottom: 5px; }
+        .podium-place .name { font-weight: bold; font-size: 14px; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; width: 90%; white-space: nowrap;}
+        .podium-place .score { font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 10px; }
+
+        /* ترتيب وألوان المنصة */
+        .place-1 { 
+            height: 100%; 
+            background: linear-gradient(to top, #f1c40f, #f39c12); 
+            order: 2; /* الأول في النص */
+            z-index: 3;
+            animation-delay: 0.2s;
+        }
+        .place-2 { 
+            height: 75%; 
+            background: linear-gradient(to top, #bdc3c7, #95a5a6); 
+            order: 1; /* التاني على الشمال */
+            z-index: 2;
+            animation-delay: 0.4s;
+        }
+        .place-3 { 
+            height: 60%; 
+            background: linear-gradient(to top, #cd7f32, #e67e22); 
+            order: 3; /* التالت على اليمين */
+            z-index: 1;
+            animation-delay: 0.6s;
+        }
+
+        /* باقي اللاعبين (من المركز الرابع) */
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* تأثير اللمس */
+        .player-card:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .rank-circle {
+            background: #34495e;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            border: 2px solid #fff;
+        }
+
+        .list-name {
+            flex-grow: 1;
+            margin-left: 15px;
+            font-size: 16px;
+        }
+
+        .list-score {
+            color: #2ecc71;
+            font-size: 16px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        /* الأنيميشن */
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🏆 Los Héroes 🏆</h2>
+
+    <div id="loader">Cargando los héroes... ⏳</div>
+
+    <div class="podium-container" id="podium">
+        </div>
+
+    <ul class="leaderboard-list" id="board">
+        </ul>
+
+    <script>
+        // رابط السكريبت الخاص بك
+        const scriptURL = "https://script.google.com/macros/s/AKfycbytoWEVs928mvLWytdf_GrpHqxQMzdTU9fXEwmUqmvrC8aNjCbFQZtiIG3YbzAd-yg/exec?action=getAllGames";
+
+        async function fetchLeaderboard() {
+            try {
+                const response = await fetch(scriptURL);
+                const data = await response.json();
+                
+                const podium = document.getElementById("podium");
+                const board = document.getElementById("board");
+                const loader = document.getElementById("loader");
+
+                loader.style.display = "none";
+                podium.style.display = "flex";
+
+                // التأكد من وجود بيانات
+                if(!data || data.length === 0) {
+                    board.innerHTML = "<p style='text-align:center;'>No hay datos disponibles.</p>";
+                    return;
+                }
+
+                // تجهيز أول 3 مراكز (المنصة)
+                const top3 = data.slice(0, 3);
+                
+                // إضافة المركز الأول إن وجد
+                if(top3[0]) {
+                    podium.innerHTML += `
+                        <div class="podium-place place-1">
+                            <div class="medal">🥇</div>
+                            <div class="name">${top3[0].name || top3[0][0]}</div>
+                            <div class="score">${top3[0].score || top3[0][1]} Pts</div>
+                        </div>
+                    `;
+                }
+                
+                // إضافة المركز الثاني إن وجد
+                if(top3[1]) {
+                    podium.innerHTML += `
+                        <div class="podium-place place-2">
+                            <div class="medal">🥈</div>
+                            <div class="name">${top3[1].name || top3[1][0]}</div>
+                            <div class="score">${top3[1].score || top3[1][1]} Pts</div>
+                        </div>
+                    `;
+                }
+                
+                // إضافة المركز الثالث إن وجد
+                if(top3[2]) {
+                    podium.innerHTML += `
+                        <div class="podium-place place-3">
+                            <div class="medal">🥉</div>
+                            <div class="name">${top3[2].name || top3[2][0]}</div>
+                            <div class="score">${top3[2].score || top3[2][1]} Pts</div>
+                        </div>
+                    `;
+                }
+
+                // تجهيز باقي اللاعبين (من المركز الرابع للآخر)
+                const restPlayers = data.slice(3);
+                restPlayers.forEach((player, index) => {
+                    const rankNum = index + 4; // لأننا شلنا أول 3
+                    const li = document.createElement("li");
+                    li.className = "player-card";
+                    // نظبط التأخير بتاع الأنيميشن عشان ينزلوا ورا بعض
+                    li.style.animationDelay = `${(index * 0.1) + 0.8}s`; 
+                    
+                    // استخدمنا || عشان لو السكريبت بيرجع المصفوفة كأسماء أعمدة أو أرقام
+                    const playerName = player.name || player[0]; 
+                    const playerScore = player.score || player[1];
+
+                    li.innerHTML = `
+                        <div class="rank-circle">${rankNum}</div>
+                        <div class="list-name">${playerName}</div>
+                        <div class="list-score">${playerScore} Pts</div>
+                    `;
+                    board.appendChild(li);
+                });
+
+            } catch (error) {
+                document.getElementById("loader").innerHTML = "❌ Error de conexión. Verifica tu internet.";
+                console.error("Error al obtener los datos:", error);
+            }
+        }
+
+        window.onload = fetchLeaderboard;
+    </script>
+
+</body>
+</html>
